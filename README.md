@@ -7,4 +7,5 @@ On Nanopi Neo3 armbian:
 6. bash oled_setup.sh
 
 Start the container:
+
 docker start oled_info && docker exec -d oled_info python3 /oled/oled-display.py
