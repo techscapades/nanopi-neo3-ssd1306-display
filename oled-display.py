@@ -31,23 +31,34 @@ except:
     mac_label_font = ImageFont.load_default()
     mac_address_font = ImageFont.load_default()
 
-# Get the MAC address from the command output
-try:
-    result = subprocess.check_output("ip link show end0 | awk '/ether/ {print $2}' | tr -d ':'", shell=True)
-    mac_address = result.decode('utf-8').strip()  # Decode and strip any extra whitespace/newline
-except subprocess.CalledProcessError as e:
-    mac_address = "Error fetching MAC"
+# Infinite loop to continuously update display
+while True:
+    try:
+        # Get the MAC address from the command output
+        try:
+            result = subprocess.check_output("ip link show end0 | awk '/ether/ {print $2}' | tr -d ':'", shell=True)
+            mac_address = result.decode('utf-8').strip()  # Decode and strip any extra whitespace/newline
+        except subprocess.CalledProcessError as e:
+            mac_address = "Error fetching MAC"
 
-# Draw the 'MAC: ' label with its font size and position
-draw.text(mac_label_position, "DEVICE ID: ", font=mac_label_font, fill=255)
+        # Clear the image and redraw the text
+        image = Image.new("1", (oled.width, oled.height))
+        draw = ImageDraw.Draw(image)
 
-# Draw the MAC address with its font size and position
-draw.text(mac_address_position, mac_address, font=mac_address_font, fill=255)
+        # Draw the 'MAC: ' label with its font size and position
+        draw.text(mac_label_position, "DEVICE ID: ", font=mac_label_font, fill=255)
 
-# Display image on OLED
-oled.display(image)
+        # Draw the MAC address with its font size and position
+        draw.text(mac_address_position, mac_address, font=mac_address_font, fill=255)
 
-# Show for 5 seconds, then clear
-time.sleep(5)
-oled.clear()
+        # Display image on OLED
+        oled.display(image)
 
+        # Wait for a while before updating again (e.g., 10 seconds)
+        time.sleep(10)
+        
+    except KeyboardInterrupt:
+        # Graceful exit on Ctrl + C
+        print("Exiting gracefully...")
+        oled.clear()
+        break  # Break the loop when Ctrl+C is pressed
